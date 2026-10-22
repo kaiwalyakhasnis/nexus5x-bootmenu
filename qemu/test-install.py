@@ -184,8 +184,10 @@ try:
         time.sleep(0.5)
     text = menu_text()
     print("    " + "\n    ".join(l.split("] ", 1)[1] for l in text.splitlines() if "bootmenu: image" in l or "menu ready" in l))
-    check("9-TWRP.img: ok, in the recovery slot" in text and "default 4, timeout 5 s" in text,
+    check("9-TWRP.img: ok, in the recovery slot" in text and "default 4, timeout 0 s" in text,
           "TWRP is current and the default")
+    time.sleep(10)
+    check("Restarting system" not in menu_text(), "nothing starts without a choice")
     subprocess.run([sys.executable, os.path.join(Q, "qmp.py"), "shot", os.path.join(T, "menu.png")], stdout=subprocess.DEVNULL)
     subprocess.run([sys.executable, os.path.join(Q, "qmp.py"), "key", "up", "up", "up", "up", "ret"], check=True)
     end = time.time() + 60

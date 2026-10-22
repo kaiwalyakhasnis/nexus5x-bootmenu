@@ -91,8 +91,9 @@ private const val KEY_POWER = 116
 
 /**
  * The menu. Volume keys (or arrows) move, Power (or Enter) starts, a tap
- * starts what it hits. The image in the recovery slot is the default and
- * starts by itself after bootmenu.timeout seconds unless a key is pressed.
+ * starts what it hits. The image in the recovery slot is selected first.
+ * Nothing starts by itself unless bootmenu.timeout is set (seconds; a key
+ * press stops it).
  *
  * Selection is the app's own state, not the toolkit's key focus: it has to
  * start on the default entry. So rows take taps through pointerInput (which

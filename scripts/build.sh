@@ -5,14 +5,14 @@
 #   out/bootmenu-boot.img        for the phone's boot partition (board nexus5x)
 #   out/bootmenu-boot-qemu.img   the same app for qemu/ (board nexus5x-qemu)
 # Settings (local.env): LINEAGE, EMBEDDED_COMPOSE (default ../embedded-compose),
-#   KERNEL (Image.gz-dtb, default the LineageOS build's), TIMEOUT (auto-boot s, 5).
+#   KERNEL (Image.gz-dtb, default the LineageOS build's), TIMEOUT (auto-boot s, 0: none).
 set -euo pipefail
 P=$(cd "$(dirname "$0")/.." && pwd)
 [ -f "$P/local.env" ] && . "$P/local.env"
 : "${LINEAGE:?set LINEAGE in local.env (see local.env.example)}"
 EC=${EMBEDDED_COMPOSE:-$P/../embedded-compose}
 KERNEL=${KERNEL:-$LINEAGE/out/target/product/bullhead/kernel}
-TIMEOUT=${TIMEOUT:-5}
+TIMEOUT=${TIMEOUT:-0}
 [ -f "$KERNEL" ] || { echo "no kernel at $KERNEL (build LineageOS or set KERNEL=)" >&2; exit 1; }
 [ -x "$EC/ec" ] || { echo "no embedded-compose at $EC (set EMBEDDED_COMPOSE=)" >&2; exit 1; }
 mkdir -p "$P/out"

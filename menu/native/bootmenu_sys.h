@@ -27,7 +27,7 @@ void bm_init(void);
 int bm_scan(void);                 // number of entries
 const bm_entry* bm_get(int i);
 int bm_default(void);              // the entry in the recovery slot, -1 if none
-int bm_timeout(void);              // auto-boot seconds (bootmenu.timeout=, 5 by default)
+int bm_timeout(void);              // auto-boot seconds (bootmenu.timeout=), 0: wait for a choice
 int bm_charger(void);              // powered on by a charger (androidboot.mode=charger)
 int bm_battery(void);              // percent, -1 if unknown
 

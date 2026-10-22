@@ -35,8 +35,8 @@ power on ─▶ aboot ─▶ boot partition: the MENU (LineageOS kernel + menu a
              aboot ─▶ recovery partition: the chosen image
 ```
 
-- The next power-on shows the menu again. The last choice is highlighted and
-  boots after 5 s.
+- The next power-on shows the menu again, with the last choice highlighted.
+  Nothing starts until you pick (`TIMEOUT=5 scripts/build.sh` adds a countdown).
 - `/cache` holds the images because it is the phone's only unencrypted ext4
   partition (96 MiB). The menu mounts it read-only.
 - **The menu writes only `recovery`**. It finds the partition by its GPT name,

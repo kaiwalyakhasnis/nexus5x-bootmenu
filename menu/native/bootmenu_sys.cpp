@@ -304,7 +304,7 @@ int bm_default() { return g_default; }
 
 int bm_timeout() {
   std::string t = kv_value(g_cmdline, "bootmenu.timeout", ' ');
-  return t.empty() ? 5 : atoi(t.c_str());
+  return t.empty() ? 0 : atoi(t.c_str());
 }
 
 int bm_charger() { return kv_value(g_cmdline, "androidboot.mode", ' ') == "charger"; }
