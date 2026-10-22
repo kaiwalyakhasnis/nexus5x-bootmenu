@@ -4,7 +4,7 @@ about, under their real GPT names:
 
   sbl1, aboot   1 MiB each, filled with a marker: they must never change
   misc          1 MiB of zeros
-  boot          32 MiB: out/bootmenu-boot.img (the menu)
+  boot          32 MiB: out/bootmenu-boot-qemu.img (the menu)
   recovery      32 MiB: what was there before the menu (TWRP on the phone;
                 here LineageOS recovery.img stands in, or --recovery)
   cache         96 MiB ext4 (Android's make_ext4fs): out/images/ in bootmenu/
@@ -32,7 +32,7 @@ a.add_argument("--before-install", action="store_true",
                help="the phone before phone/install.sh: LineageOS in boot, an empty cache")
 args = a.parse_args()
 
-menu = os.path.join(P, "out", "bootmenu-boot.img")
+menu = os.path.join(P, "out", "bootmenu-boot-qemu.img")
 images = os.path.join(P, "out", "images")
 for f in (menu, images, args.recovery):
     if not os.path.exists(f):

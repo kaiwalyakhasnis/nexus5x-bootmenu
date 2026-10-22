@@ -3,6 +3,7 @@
 
   qemu/qmp.py shot [file.png]      the 1080x1920 framebuffer (default out/qemu/shot.png)
   qemu/qmp.py key down down ret    keys, QEMU names: up down ret spc esc ...
+  qemu/qmp.py tap X Y              a touch at screen pixel X,Y (the virtio tablet)
 """
 import json, os, socket, sys, tempfile, time
 
@@ -44,5 +45,13 @@ elif sys.argv[1] == "key":
     for k in sys.argv[2:]:
         qmp("send-key", keys=[{"type": "qcode", "data": k}])
         time.sleep(0.3)
+elif sys.argv[1] == "tap":
+    x, y = (int(v) * 0x7fff // n for v, n in zip(sys.argv[2:4], (W, H)))   # tablet axes are 0..0x7fff
+    for down in (True, False):
+        qmp("input-send-event", events=[
+            {"type": "abs", "data": {"axis": "x", "value": x}},
+            {"type": "abs", "data": {"axis": "y", "value": y}},
+            {"type": "btn", "data": {"down": down, "button": "left"}}])
+        time.sleep(0.15)
 else:
     sys.exit(__doc__)

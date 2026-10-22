@@ -142,7 +142,7 @@ def cache_files():
 img = lambda n: open(os.path.join(P, "out", "images", n), "rb").read()
 LINEAGE_BOOT = img("1-LineageOS.img")
 TWRP = open(os.path.join(LINEAGE, "out/target/product/bullhead/recovery.img"), "rb").read()
-MENU = open(os.path.join(P, "out", "bootmenu-boot.img"), "rb").read()
+MENU = open(os.path.join(P, "out", "bootmenu-boot.img"), "rb").read()   # what install.sh writes (the phone build)
 
 print("phone before install:")
 subprocess.run([sys.executable, os.path.join(Q, "make-emmc.py"), "--before-install"], check=True, stdout=subprocess.DEVNULL)

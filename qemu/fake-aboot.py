@@ -115,7 +115,8 @@ while True:
     rd = os.path.join(OUT, "ramdisk.img")
     open(rd, "wb").write(img["ramdisk"])
     # the image's own command line + what the QEMU kernel needs (see the kit's README.txt)
-    cmdline = img["cmdline"] + " earlyprintk=pl011,0x9000000 keep_bootcon mem=1024M"
+    # ignore_loglevel: the menu's init lowers the console log level; its log is how this script follows it
+    cmdline = img["cmdline"] + " earlyprintk=pl011,0x9000000 keep_bootcon mem=1024M ignore_loglevel"
     log = os.path.join(OUT, "logs", f"boot-{boot:02d}-{slot}.log")
     open(os.path.join(OUT, "current.json"), "w").write(json.dumps({"boot": boot, "slot": slot, "log": log}))
     if os.path.exists(args.qmp):
@@ -123,7 +124,7 @@ while True:
     q = subprocess.Popen([
         "qemu-system-aarch64", "-M", "virt,gic-version=2,virtualization=on", "-cpu", "cortex-a57",
         "-smp", "6", "-m", "2048", "-dtb", args.dtb, "-no-reboot",
-        "-device", "ramfb", "-device", "virtio-keyboard-device",
+        "-device", "ramfb", "-device", "virtio-keyboard-device", "-device", "virtio-tablet-device",   # tablet: mouse = touch
         "-drive", f"file={args.emmc},if=none,format=raw,id=emmc", "-device", "virtio-blk-device,drive=emmc",
         "-display", "none" if args.headless else "gtk,zoom-to-fit=on",
         "-serial", f"file:{log}", "-monitor", "none", "-qmp", f"unix:{args.qmp},server=on,wait=off",

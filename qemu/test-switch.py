@@ -64,7 +64,7 @@ def wait_menu():
     entries = [re.sub(r"^\d+[-_]", "", n).replace("_", " ") for n, _, _ in images]
     if not any("in the recovery slot" in s for _, s, _ in images):
         entries.append("Recovery slot as is")
-    entries += ["Bootloader (fastboot)", "Power off"]
+    entries += ["Bootloader", "Power off"]
     print(f"    {time.strftime('%H:%M:%S')} menu ready on boot {boot}", flush=True)
     ready = re.search(r"menu ready: (\d+) entries, default (-?\d+)", text)
     assert int(ready.group(1)) == len(entries), (entries, ready.group(0))
@@ -142,7 +142,7 @@ try:
           "a broken image is refused, the menu stays")
 
     print("bootloader:")
-    keys(*path(entries, entries.index("Broken"), "Bootloader (fastboot)"), "ret")
+    keys(*path(entries, entries.index("Broken"), "Bootloader"), "ret")
     menu_log_after(boot, r"Restarting system with command 'bootloader'")
     aboot.wait(30)
     check("fastboot mode" in open(os.path.join(T, "aboot.out")).read(), "Bootloader reboots with reason bootloader")

@@ -1,0 +1,3 @@
+# Kotlin bindings for native/bootmenu_sys.h (linked in from app.env's APP_NATIVE).
+headers = bootmenu_sys.h
+package = sys

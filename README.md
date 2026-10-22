@@ -1,8 +1,9 @@
 # nexus5x-bootmenu
 
 A GRUB-style boot menu for the **Nexus 5X** (bullhead). Every power-on shows the
-boot images stored on the phone. Pick one with the volume keys and Power. No PC
-needed after a one-time install.
+boot images stored on the phone. Pick one with the volume keys and Power, or
+tap it. No PC needed after a one-time install. The menu itself is a Jetpack
+Compose app, running on [embedded-compose](https://github.com/kaiwalyakhasnis/embedded-compose).
 
 <p align="center"><img src="docs/qemu.png" alt="The boot menu, then Hike Buddy, Local LLM and Embedded Compose, each booted by the menu"></p>
 
@@ -41,17 +42,21 @@ power on ─▶ aboot ─▶ boot partition: the MENU (LineageOS kernel + menu a
 - **The menu writes only `recovery`**. It finds the partition by its GPT name,
   writes only valid boot images that fit, and reads the result back before
   rebooting. The QEMU tests check that every other partition stays byte-identical.
-- The menu ([`menu/bootmenu.cpp`](menu/bootmenu.cpp)) is one static binary
-  running as PID 1, drawing with AOSP's minui (fbdev). The bullhead kernel has
-  no devtmpfs, so the menu builds `/dev` from sysfs.
+- The menu is an embedded-compose app: the UI is Compose (Kotlin/Native) in
+  [`menu/src/`](menu/src/linuxArm64Main/kotlin/bootmenu/BootMenu.kt), and the
+  partition, image and reboot code is C++ in [`menu/native/`](menu/native/bootmenu_sys.cpp),
+  called through cinterop. It runs from a 2.4 MB initramfs with embedded-compose's
+  busybox init. The write runs on its own thread, so the progress bar stays live.
 
 ## Build
 
-Clone the image projects next to this one and build their boot images. Then:
+Clone [embedded-compose](https://github.com/kaiwalyakhasnis/embedded-compose)
+(it builds the menu app; see its README for the JDK and cross compiler) and the
+image projects next to this one, and build the images. Then:
 
 ```sh
 cp local.env.example local.env   # set LINEAGE: a LineageOS 15.1 tree with bullhead built
-scripts/build.sh                 # out/bootmenu-boot.img: LineageOS kernel + the menu
+scripts/build.sh                 # out/bootmenu-boot.img (+ -qemu): LineageOS kernel + the menu app
 scripts/collect-images.sh        # out/images/: the entries, for QEMU
 scripts/package.sh               # out/phone/: install.sh, uninstall.sh, menu, images
 ```
@@ -88,7 +93,7 @@ Uses the QEMU kit of
 
 ```sh
 qemu/make-emmc.py      # virtual eMMC with bullhead's partitions
-qemu/fake-aboot.py     # window: arrows + Enter; Ctrl-C = hold Power, twice = quit
+qemu/fake-aboot.py     # window: arrows + Enter, or click; Ctrl-C = hold Power, twice = quit
 qemu/make-emmc.py --test-images && qemu/test-switch.py   # every switch, refusals, untouched partitions
 qemu/test-install.py   # install.sh, the menu, uninstall.sh
 ```
@@ -107,29 +112,29 @@ The approach works on a phone whose unlocked bootloader:
 2. boots unsigned images from both partitions.
 
 You also need an unencrypted partition with room for the images, and a kernel
-with fbdev and initramfs support.
+with a framebuffer (fbdev or DRM) and initramfs support.
 
 To port it, change:
 
 | What | Where |
 |---|---|
 | Kernel, command line, base and offsets (from the device's `BoardConfig.mk`) | `scripts/build.sh` |
-| Partition names, the image directory, the allowed slot size | constants at the top of `menu/bootmenu.cpp` |
+| Partition names, the image directory, the allowed slot size | constants at the top of `menu/native/bootmenu_sys.cpp` |
 | The `by-name` path and the device check | `phone/install.sh`, `phone/uninstall.sh` |
-| Key codes (default: volume keys and Power, or arrows and Enter) | `main()` in `menu/bootmenu.cpp` |
+| Screen density, font, pixel format | an embedded-compose board (`boards/<name>/board.sh` there), named in `scripts/build.sh` |
+| Key codes (default: volume keys and Power, or arrows and Enter) | `BootMenu.kt` |
 | Partition sizes, for the QEMU tests | `LAYOUT` in `qemu/make-emmc.py` |
 
-DRM-only kernels need minui's DRM backend (`graphics_drm.cpp` in AOSP). A/B
-phones have no `recovery` partition: there, the menu would write the other
+A/B phones have no `recovery` partition: there, the menu would write the other
 slot's `boot` and switch the active slot instead.
 
 ## Layout
 
 | Path | What |
 |---|---|
-| `menu/` | the menu, with minui (from AOSP, via nexus5x-hike-buddy) |
+| `menu/` | the menu app: Compose UI (`src/`), C++ system code (`native/`), built by embedded-compose |
 | `scripts/` | build, collect images, package, `mkbootimg.py` |
 | `phone/` | `install.sh`, `uninstall.sh`, run on the phone as root |
 | `qemu/` | virtual eMMC, fake bootloader, keys and screenshots, tests |
 
-minui is AOSP code under the Apache License 2.0.
+The display and input go through embedded-compose's backend: AOSP's minui, under the Apache License 2.0.
